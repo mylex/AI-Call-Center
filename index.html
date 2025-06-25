@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meet AI - Intelligent Video Conferencing</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .video-section {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .video-container {
+            position: relative;
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            height: 400px;
+            margin-bottom: 20px;
+        }
+
+        .video-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, #2c3e50, #34495e);
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .ai-avatar {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            border: 3px solid white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .control-btn.mute { background: #e74c3c; color: white; }
+        .control-btn.video { background: #3498db; color: white; }
+        .control-btn.end { background: #e74c3c; color: white; }
+        .control-btn.ai { background: #9b59b6; color: white; }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+
+        .control-btn.active {
+            background: #27ae60;
+        }
+
+        .meeting-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .meeting-info h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .meeting-id {
+            font-family: monospace;
+            background: white;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .panel h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ai-chat {
+            height: 250px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #fafafa;
+        }
+
+        .chat-message {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 8px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-message.ai {
+            background: #e3f2fd;
+            border-left: 3px solid #2196f3;
+        }
+
+        .chat-message.user {
+            background: #f3e5f5;
+            border-left: 3px solid #9c27b0;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .chat-input button {
+            padding: 10px 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .participants {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .participant {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            background: #f8f9fa;
+        }
+
+        .participant-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+        }
+
+        .transcript {
+            height: 150px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 10px;
+            background: #fafafa;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .transcript-entry {
+            margin-bottom: 8px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .transcript-speaker {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .action-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn.primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .action-btn.secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .status-indicator.online { background: #27ae60; }
+        .status-indicator.away { background: #f39c12; }
+        .status-indicator.offline { background: #e74c3c; }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                flex-wrap: wrap;
+            }
+        }
+
+        .ai-insights {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .ai-insights h4 {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .insight-item {
+            background: rgba(255,255,255,0.1);
+            padding: 8px;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-video"></i> Meet AI</h1>
+            <p>Intelligent Video Conferencing with AI-Powered Features</p>
+        </header>
+
+        <div class="main-content">
+            <div class="video-section">
+                <div class="video-container">
+                    <div class="video-placeholder">
+                        <div>
+                            <i class="fas fa-video" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                            <p>Camera is off - Click to start video</p>
+                        </div>
+                    </div>
+                    <div class="ai-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="control-btn mute" onclick="toggleMute()" title="Mute/Unmute">
+                        <i class="fas fa-microphone" id="mic-icon"></i>
+                    </button>
+                    <button class="control-btn video" onclick="toggleVideo()" title="Camera On/Off">
+                        <i class="fas fa-video" id="video-icon"></i>
+                    </button>
+                    <button class="control-btn ai" onclick="toggleAI()" title="AI Assistant">
+                        <i class="fas fa-robot"></i>
+                    </button>
+                    <button class="control-btn" onclick="shareScreen()" title="Share Screen">
+                        <i class="fas fa-desktop"></i>
+                    </button>
+                    <button class="control-btn end" onclick="endCall()" title="End Call">
+                        <i class="fas fa-phone-slash"></i>
+                    </button>
+                </div>
+
+                <div class="meeting-info">
+                    <h3><i class="fas fa-info-circle"></i> Meeting Details</h3>
+                    <p><strong>Meeting ID:</strong> <span class="meeting-id" id="meeting-id">meet-ai-xyz-123</span></p>
+                    <p><strong>Status:</strong> <span class="status-indicator online"></span>Active</p>
+                    <p><strong>Duration:</strong> <span id="duration">00:00:00</span></p>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="panel">
+                    <h3><i class="fas fa-robot"></i> AI Assistant</h3>
+                    <div class="ai-chat" id="ai-chat">
+                        <div class="chat-message ai">
+                            <strong>AI:</strong> Welcome to Meet AI! I'm here to help with meeting summaries, notes, and assistance. How can I help you today?
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="chat-input" placeholder="Ask AI anything..." onkeypress="handleChatEnter(event)">
+                        <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3><i class="fas fa-users"></i> Participants (3)</h3>
+                    <div class="participants">
+                        <div class="participant">
+                            <div class="participant-avatar">YU</div>
+                            <span>You (Host)</span>
+                            <span class="status-indicator online"></span>
+                        </div>
+                        <div class="participant">
+                            <div class="participant-avatar">AI</div>
+                            <span>AI Assistant</span>
+                            <span class="status-indicator online"></span>
+                        </div>
+                        <div class="participant">
+                            <div class="participant-avatar">JD</div>
+                            <span>John Doe</span>
+                            <span class="status-indicator away"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h3><i class="fas fa-closed-captioning"></i> Live Transcript</h3>
+                    <div class="transcript" id="transcript">
+                        <div class="transcript-entry">
+                            <span class="transcript-speaker">You:</span> Welcome everyone to today's meeting.
+                        </div>
+                        <div class="transcript-entry">
+                            <span class="transcript-speaker">AI:</span> I'm ready to assist with note-taking and summaries.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="ai-insights">
+                <h4><i class="fas fa-lightbulb"></i> AI Insights</h4>
+                <div class="insight-item">
+                    <strong>Meeting Sentiment:</strong> Positive and productive
+                </div>
+                <div class="insight-item">
+                    <strong>Key Topics:</strong> Project timeline, budget allocation, team responsibilities
+                </div>
+                <div class="insight-item">
+                    <strong>Action Items:</strong> 3 tasks identified, 2 pending assignments
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="action-btn primary" onclick="generateSummary()">
+                <i class="fas fa-file-alt"></i> Generate Summary
+            </button>
+            <button class="action-btn secondary" onclick="exportTranscript()">
+                <i class="fas fa-download"></i> Export Transcript
+            </button>
+            <button class="action-btn secondary" onclick="scheduleFollowUp()">
+                <i class="fas fa-calendar-plus"></i> Schedule Follow-up
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let isMuted = false;
+        let isVideoOn = true;
+        let isAIActive = true;
+        let startTime = Date.now();
+        let durationInterval;
+
+        // Initialize the app
+        function initializeApp() {
+            startDurationTimer();
+            simulateMeetingActivity();
+        }
+
+        // Duration timer
+        function startDurationTimer() {
+            durationInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const hours = Math.floor(elapsed / 3600000);
+                const minutes = Math.floor((elapsed % 3600000) / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                
+                document.getElementById('duration').textContent = 
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        // Control functions
+        function toggleMute() {
+            isMuted = !isMuted;
+            const micIcon = document.getElementById('mic-icon');
+            const muteBtn = micIcon.parentElement;
+            
+            if (isMuted) {
+                micIcon.className = 'fas fa-microphone-slash';
+                muteBtn.style.background = '#e74c3c';
+                addTranscriptEntry('System', 'Microphone muted');
+            } else {
+                micIcon.className = 'fas fa-microphone';
+                muteBtn.style.background = '#27ae60';
+                addTranscriptEntry('System', 'Microphone unmuted');
+            }
+        }
+
+        function toggleVideo() {
+            isVideoOn = !isVideoOn;
+            const videoIcon = document.getElementById('video-icon');
+            const videoBtn = videoIcon.parentElement;
+            const videoPlaceholder = document.querySelector('.video-placeholder');
+            
+            if (isVideoOn) {
+                videoIcon.className = 'fas fa-video';
+                videoBtn.style.background = '#3498db';
+                videoPlaceholder.innerHTML = '<div><i class="fas fa-video" style="font-size: 3rem; margin-bottom: 15px;"></i><p>Video is on</p></div>';
+                addTranscriptEntry('System', 'Camera turned on');
+            } else {
+                videoIcon.className = 'fas fa-video-slash';
+                videoBtn.style.background = '#e74c3c';
+                videoPlaceholder.innerHTML = '<div><i class="fas fa-video-slash" style="font-size: 3rem; margin-bottom: 15px;"></i><p>Camera is off</p></div>';
+                addTranscriptEntry('System', 'Camera turned off');
+            }
+        }
+
+        function toggleAI() {
+            isAIActive = !isAIActive;
+            const aiBtn = document.querySelector('.control-btn.ai');
+            
+            if (isAIActive) {
+                aiBtn.style.background = '#9b59b6';
+                addAIMessage('AI Assistant is now active and monitoring the meeting.');
+            } else {
+                aiBtn.style.background = '#7f8c8d';
+                addAIMessage('AI Assistant has been paused.');
+            }
+        }
+
+        function shareScreen() {
+            addAIMessage('Screen sharing initiated. AI will analyze shared content for insights.');
+            addTranscriptEntry('System', 'Screen sharing started');
+        }
+
+        function endCall() {
+            if (confirm('Are you sure you want to end the meeting?')) {
+                clearInterval(durationInterval);
+                addAIMessage('Meeting ended. Generating final summary and insights...');
+                setTimeout(() => {
+                    alert('Meeting summary and transcript have been saved to your account.');
+                }, 2000);
+            }
+        }
+
+        // Chat functions
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (message) {
+                addChatMessage('user', message);
+                input.value = '';
+                
+                // Simulate AI response
+                setTimeout(() => {
+                    const responses = [
+                        'I understand. I\'ll note that down for the meeting summary.',
+                        'Great point! I\'ve added that to the action items.',
+                        'Based on the discussion, I recommend scheduling a follow-up on this topic.',
+                        'I\'ll help you track that deliverable and remind participants.',
+                        'Excellent! I\'ve updated the meeting insights with this information.'
+                    ];
+                    const response = responses[Math.floor(Math.random() * responses.length)];
+                    addChatMessage('ai', response);
+                }, 1000);
+            }
+        }
+
+        function handleChatEnter(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function addChatMessage(type, message) {
+            const chatContainer = document.getElementById('ai-chat');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${type}`;
+            messageDiv.innerHTML = `<strong>${type === 'ai' ? 'AI' : 'You'}:</strong> ${message}`;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function addAIMessage(message) {
+            addChatMessage('ai', message);
+        }
+
+        // Transcript functions
+        function addTranscriptEntry(speaker, text) {
+            const transcript = document.getElementById('transcript');
+            const entry = document.createElement('div');
+            entry.className = 'transcript-entry';
+            entry.innerHTML = `<span class="transcript-speaker">${speaker}:</span> ${text}`;
+            transcript.appendChild(entry);
+            transcript.scrollTop = transcript.scrollHeight;
+        }
+
+        // Action functions
+        function generateSummary() {
+            addAIMessage('Generating comprehensive meeting summary with action items, key decisions, and next steps...');
+            setTimeout(() => {
+                alert('Meeting Summary Generated!\n\n' +
+                      '📋 Key Points:\n' +
+                      '• Project timeline discussed\n' +
+                      '• Budget allocation approved\n' +
+                      '• Team responsibilities assigned\n\n' +
+                      '✅ Action Items:\n' +
+                      '• John to prepare Q2 report\n' +
+                      '• Schedule follow-up meeting\n' +
+                      '• Review budget proposal\n\n' +
+                      'Full summary sent to all participants.');
+            }, 2000);
+        }
+
+        function exportTranscript() {
+            addAIMessage('Exporting complete meeting transcript with timestamps and speaker identification...');
+            setTimeout(() => {
+                alert('Transcript exported successfully!\n\nThe transcript has been saved as a PDF and sent to your email.');
+            }, 1500);
+        }
+
+        function scheduleFollowUp() {
+            addAIMessage('AI is analyzing the meeting to suggest optimal follow-up timing and agenda items...');
+            setTimeout(() => {
+                alert('Follow-up Meeting Suggested!\n\n' +
+                      '📅 Recommended Date: Next Wednesday\n' +
+                      '⏰ Time: 2:00 PM\n' +
+                      '📝 Suggested Agenda:\n' +
+                      '• Review action item progress\n' +
+                      '• Q2 report presentation\n' +
+                      '• Budget approval finalization\n\n' +
+                      'Calendar invites will be sent to all participants.');
+            }, 2000);
+        }
+
+        // Simulate meeting activity
+        function simulateMeetingActivity() {
+            const activities = [
+                () => addTranscriptEntry('John Doe', 'I think we should focus on the Q2 objectives.'),
+                () => addTranscriptEntry('You', 'That\'s a great point. Let me share the latest metrics.'),
+                () => addAIMessage('I\'ve detected discussion about Q2 objectives. Would you like me to pull up related documents?'),
+                () => addTranscriptEntry('John Doe', 'The budget allocation looks good for the next quarter.'),
+                () => addAIMessage('Action item identified: Review Q2 budget allocation. Added to meeting notes.'),
+            ];
+
+            let activityIndex = 0;
+            setInterval(() => {
+                if (activityIndex < activities.length && isAIActive) {
+                    activities[activityIndex]();
+                    activityIndex++;
+                }
+            }, 8000);
+        }
+
+        // Initialize the application
+        initializeApp();
+    </script>
+</body>
+</html>
